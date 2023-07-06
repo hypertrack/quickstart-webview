@@ -193,13 +193,13 @@ object HyperTrackJsApi {
             .toSet()
     }
 
-    internal sealed class LocationError
-    internal object NotRunning : LocationError()
-    internal object Starting : LocationError()
-    internal data class Errors(val errors: Set<HyperTrackError>) : LocationError()
+    private sealed class LocationError
+    private object NotRunning : LocationError()
+    private object Starting : LocationError()
+    private data class Errors(val errors: Set<HyperTrackError>) : LocationError()
 
     @Suppress("EnumEntryName")
-    internal enum class HyperTrackError {
+    private enum class HyperTrackError {
         gpsSignalLost,
         locationMocked,
         locationPermissionsDenied,
@@ -225,7 +225,7 @@ object HyperTrackJsApi {
         val expectedLocation: Location?
     )
 
-    internal sealed class Result<SuccessType> {
+    private sealed class Result<SuccessType> {
         fun <MappedSuccess> flatMapSuccess(
             onSuccess: (SuccessType) -> Result<MappedSuccess>
         ): Result<MappedSuccess> {
@@ -273,8 +273,8 @@ object HyperTrackJsApi {
         }
     }
 
-    internal data class Success<SuccessType>(val success: SuccessType) : Result<SuccessType>()
-    internal data class Failure<SuccessType>(val failure: Throwable) : Result<SuccessType>()
+    private data class Success<SuccessType>(val success: SuccessType) : Result<SuccessType>()
+    private data class Failure<SuccessType>(val failure: Throwable) : Result<SuccessType>()
 
     /**
      * Serialization
@@ -348,7 +348,7 @@ object HyperTrackJsApi {
         }
     }
 
-    internal class Parser(
+    private class Parser(
         private val source: Map<String, Any?>
     ) {
         private val _exceptions = mutableListOf<Exception>()
@@ -394,7 +394,7 @@ object HyperTrackJsApi {
         }
     }
 
-    internal data class ParsingExceptions(
+    private data class ParsingExceptions(
         val source: Any,
         val exceptions: List<Exception>
     ) : Throwable(
@@ -404,7 +404,7 @@ object HyperTrackJsApi {
             }
     )
 
-    internal class ParsingException(
+    private class ParsingException(
         key: String,
         exception: Exception
     ) : Exception("Invalid value for '$key': $exception", exception)
