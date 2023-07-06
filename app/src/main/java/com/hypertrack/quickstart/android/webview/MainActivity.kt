@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
             settings.domStorageEnabled = true
             settings.javaScriptCanOpenWindowsAutomatically = true
             webChromeClient = WebChromeClient()
-            addJavascriptInterface(JsToJavaInterface(), "JsToJavaInterface")
+            addJavascriptInterface(HyperTrackJsApi, HyperTrackJsApi.apiName)
         }
 
         if (savedInstanceState == null) {
