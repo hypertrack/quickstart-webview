@@ -15,6 +15,7 @@ import org.json.JSONObject
 object HyperTrackJsApi {
 
     const val apiName = "HyperTrack"
+    private const val PUBLISHABLE_KEY = "PasteYourPublishableKeyHere"
 
     private const val KEY_TYPE = "type"
     private const val KEY_VALUE = "value"
@@ -36,7 +37,7 @@ object HyperTrackJsApi {
     private const val KEY_LONGITUDE = "longitude"
 
     private val sdkInstance by lazy {
-        HyperTrack.getInstance("PasteYourPublishableKeyHere")
+        HyperTrack.getInstance(PUBLISHABLE_KEY)
     }
 
     @JavascriptInterface
