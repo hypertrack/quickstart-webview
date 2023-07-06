@@ -1,12 +1,10 @@
 package com.hypertrack.quickstart.android.webview
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.webkit.WebChromeClient
 import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
@@ -23,7 +21,8 @@ class MainActivity : AppCompatActivity() {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.javaScriptCanOpenWindowsAutomatically = true
-           webChromeClient = WebChromeClient()
+            webChromeClient = WebChromeClient()
+            addJavascriptInterface(JsToJavaInterface(), "JsToJavaInterface")
         }
 
         if (savedInstanceState == null) {
