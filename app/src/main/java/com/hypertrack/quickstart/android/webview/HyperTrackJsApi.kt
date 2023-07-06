@@ -64,20 +64,27 @@ object HyperTrackJsApi {
         dataJsonString: String,
         expectedLocationString: String?
     ): String {
-        return deserializeJsGeotagData(dataJsonString, expectedLocationString)
-            .flatMapSuccess { geotagDataMap ->
-                addGeotag(geotagDataMap)
-            }.let { result ->
-                when (result) {
-                    is Failure -> {
-                        serializeJsFailure(mapOf("error" to result.failure.toString()))
-                    }
+        try {
+            return deserializeJsGeotagData(dataJsonString, expectedLocationString)
+                .flatMapSuccess { geotagDataMap ->
+                    addGeotag(geotagDataMap)
+                }.let { result ->
+                    when (result) {
+                        is Failure -> {
+                            serializeJsFailure(mapOf("error" to result.failure.toString()))
+                        }
 
-                    is Success -> {
-                        serializeJsSuccess(result.success)
+                        is Success -> {
+                            serializeGeotagResultForJs(
+                                result.success,
+                                expectedLocationString
+                            )
+                        }
                     }
                 }
-            }
+        } catch (e: Exception) {
+            return serializeJsFailure(mapOf("error" to e.toString()))
+        }
     }
 
     /**
@@ -534,6 +541,64 @@ object HyperTrackJsApi {
             KEY_TYPE to TYPE_RESULT_FAILURE,
             KEY_VALUE to value
         ).toJSONObject().toString()
+    }
+
+    private fun serializeGeotagResultForJs(
+        resultMap: Map<String, Any?>,
+        expectedLocationString: String?
+    ): String {
+        return if (resultMap[KEY_TYPE] == TYPE_RESULT_SUCCESS) {
+            if (expectedLocationString != null) {
+                serializeGeotagWithExpectedLocationSuccessForJs(resultMap)
+            } else {
+                serializeGeotagSuccessForJs(resultMap)
+            }
+        } else {
+            val resultValue = resultMap[KEY_VALUE] as Map<String, Any?>
+            if ((resultValue[KEY_TYPE] as String) == TYPE_LOCATION_ERROR_ERRORS) {
+                val errorsValue = resultValue[KEY_VALUE] as List<Map<String, Any?>>
+                serializeJsSuccess(resultValue.toMutableMap().also {
+                    it[KEY_VALUE] = errorsValue.map { errorMap ->
+                        errorMap[KEY_VALUE] as String
+                    }
+                })
+            } else {
+                serializeJsSuccess(resultMap)
+            }
+        }
+    }
+
+    private fun serializeGeotagSuccessForJs(successMap: Map<String, Any?>): String {
+        // unpack location to get rid of "type" and 1 nesting level
+        return successMap.toMutableMap().also {
+            it[KEY_VALUE] = (it[KEY_VALUE] as Map<String, Any?>).let(this::unpackLocation)
+        }.let {
+            serializeJsSuccess(it)
+        }
+    }
+
+    private fun serializeGeotagWithExpectedLocationSuccessForJs(
+        successMap: Map<String, Any?>
+    ): String {
+        // unpack locationWithDeviation and location to get rid of "type" and 1 nesting level
+        return successMap.toMutableMap().also {
+            it[KEY_VALUE] = (it[KEY_VALUE] as Map<String, Any?>).let { locationWithDeviationMap ->
+                val locationWithDeviationData =
+                    locationWithDeviationMap[KEY_VALUE] as Map<String, Any?>
+                mapOf(
+                    KEY_LOCATION to unpackLocation(
+                        locationWithDeviationData[KEY_LOCATION] as Map<String, Any?>
+                    ),
+                    KEY_DEVIATION to locationWithDeviationData[KEY_DEVIATION]
+                )
+            }
+        }.let {
+            serializeJsSuccess(it)
+        }
+    }
+
+    private fun unpackLocation(map: Map<String, Any?>): Map<String, Any?> {
+        return map[KEY_VALUE] as Map<String, Any?>
     }
 
     private fun JSONObject.toMap(): Map<String, Any?> {
