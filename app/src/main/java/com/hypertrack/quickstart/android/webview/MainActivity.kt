@@ -6,10 +6,13 @@ import android.os.PersistableBundle
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
+import com.hypertrack.sdk.HyperTrack
 
 class MainActivity : AppCompatActivity() {
 
     private var webView: WebView? = null
+    private val PUBLISHABLE_KEY =
+        "S9SNgYHyxL4abm6oFfGAKvoIGmOeZcqBcvIrBbRZ43dKuPYoJJsHSVEhdqB2VaZ2Yf1NR8l7gVIIQYG-gxkTUg"
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,7 +25,12 @@ class MainActivity : AppCompatActivity() {
             settings.domStorageEnabled = true
             settings.javaScriptCanOpenWindowsAutomatically = true
             webChromeClient = WebChromeClient()
-            addJavascriptInterface(HyperTrackJsApi, HyperTrackJsApi.apiName)
+//            addJavascriptInterface(HyperTrackJsApi, HyperTrackJsApi.apiName)
+            addJavascriptInterface(
+                HyperTrackJsApiJava(
+                    HyperTrack.getInstance(PUBLISHABLE_KEY)
+                ), HyperTrackJsApiJava.apiName
+            )
         }
 
         if (savedInstanceState == null) {

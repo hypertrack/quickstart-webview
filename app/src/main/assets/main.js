@@ -43,10 +43,7 @@ function addGeotagWithExpectedLocation() {
         let addGeotagWithExpectedLocationResult = HyperTrack.addGeotagWithExpectedLocation(
             JSON.stringify(
                 {
-                    "with_expected_location": "true",
-                    "test_object": {
-                        "test_key1": "test_value1"
-                    }
+                    "geotagWithExpectedLocation": "test_geotag_with_expected_location"
                 }
             ),
             JSON.stringify(
@@ -57,6 +54,36 @@ function addGeotagWithExpectedLocation() {
             )
         );
         alert(JSON.stringify(JSON.parse(addGeotagWithExpectedLocationResult), null, 2));
+    } catch (e) {
+        alert(e);
+    }
+}
+
+function setMetadata() {
+    try {
+        HyperTrack.setMetadata(
+            JSON.stringify(
+                {
+                    "metadata_field": "test_metadata_value"
+                }
+            )
+        );
+    } catch (e) {
+        alert(e);
+    }
+}
+
+function setName() {
+     try {
+          HyperTrack.setName("test_name");
+     } catch (e) {
+          alert(e);
+     }
+}
+
+function askForPermissions() {
+    try {
+        HyperTrack.requestPermissionsIfNecessary();
     } catch (e) {
         alert(e);
     }
