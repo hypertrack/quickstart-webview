@@ -26,7 +26,6 @@ class MainActivity : AppCompatActivity() {
             settings.domStorageEnabled = true
             settings.javaScriptCanOpenWindowsAutomatically = true
             webChromeClient = WebChromeClient()
-//            addJavascriptInterface(HyperTrackJsApi, HyperTrackJsApi.apiName)
             addJavascriptInterface(
                 HyperTrackJsApiJava(
                     HyperTrack.getInstance(PUBLISHABLE_KEY)
