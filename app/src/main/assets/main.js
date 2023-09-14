@@ -61,3 +61,33 @@ function addGeotagWithExpectedLocation() {
         alert(e);
     }
 }
+
+function setMetadata() {
+    try {
+        HyperTrack.setMetadata(
+            JSON.stringify(
+                {
+                    "metadata_field": "test_metadata_value"
+                }
+            )
+        );
+    } catch (e) {
+        alert(e);
+    }
+}
+
+function setName() {
+     try {
+          HyperTrack.setName("test_name");
+     } catch (e) {
+          alert(e);
+     }
+}
+
+function askForPermissions() {
+    try {
+        HyperTrack.requestPermissionsIfNecessary();
+    } catch (e) {
+        alert(e);
+    }
+}
