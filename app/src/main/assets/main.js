@@ -43,7 +43,10 @@ function addGeotagWithExpectedLocation() {
         let addGeotagWithExpectedLocationResult = HyperTrack.addGeotagWithExpectedLocation(
             JSON.stringify(
                 {
-                    "geotagWithExpectedLocation": "test_geotag_with_expected_location"
+                    "with_expected_location": "true",
+                    "test_object": {
+                        "test_key1": "test_value1"
+                    }
                 }
             ),
             JSON.stringify(
