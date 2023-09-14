@@ -7,8 +7,14 @@ import android.webkit.JavascriptInterface;
 import com.hypertrack.sdk.GeotagResult;
 import com.hypertrack.sdk.HyperTrack;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class HyperTrackJsApiJava {
@@ -25,14 +31,14 @@ public class HyperTrackJsApiJava {
     @JavascriptInterface
     public String addGeotag(String dataJsonString) {
         try {
-            Map<String, Object> data = WebViewSerialization.toMap(new JSONObject(dataJsonString));
+            Map<String, Object> data = toMap(new JSONObject(dataJsonString));
             GeotagResult result = sdkInstance.addGeotag(data);
             if (result instanceof GeotagResult.SuccessWithDeviation) {
                 throw new RuntimeException(
                         "addGeotag(): Unexpected GeotagResult type - GeotagResult.SuccessWithDeviation"
                 );
             }
-            return WebViewSerialization.serializeGeotagResultForJs(result);
+            return serializeGeotagResultForJs(result);
         } catch (Exception e) {
             handleException(e);
             throw new RuntimeException(e);
@@ -45,16 +51,16 @@ public class HyperTrackJsApiJava {
             if (expectedLocationJsonString == null) {
                 throw new RuntimeException("You must provide expected location");
             }
-            Map<String, Object> data = WebViewSerialization.toMap(new JSONObject(dataJsonString));
-            Map<String, Object> expectedLocationMap = WebViewSerialization.toMap(new JSONObject(expectedLocationJsonString));
-            Location expectedLocation = Serialization.deserializeLocation(expectedLocationMap);
+            Map<String, Object> data = toMap(new JSONObject(dataJsonString));
+            Map<String, Object> expectedLocationMap = toMap(new JSONObject(expectedLocationJsonString));
+            Location expectedLocation = deserializeLocation(expectedLocationMap);
             GeotagResult result = sdkInstance.addGeotag(data, expectedLocation);
             if (result instanceof GeotagResult.Success && !(result instanceof GeotagResult.SuccessWithDeviation)) {
                 throw new RuntimeException(
                         "addGeotagWithExpectedLocation(): Unexpected GeotagResult type - GeotagResult.Success"
                 );
             }
-            return WebViewSerialization.serializeGeotagResultForJs(result);
+            return serializeGeotagResultForJs(result);
         } catch (Exception e) {
             handleException(e);
             throw new RuntimeException(e);
@@ -80,7 +86,7 @@ public class HyperTrackJsApiJava {
     @JavascriptInterface
     public void setMetadata(String metadataJsonString) {
         try {
-            Map<String, Object> metadata = WebViewSerialization.toMap(new JSONObject(metadataJsonString));
+            Map<String, Object> metadata = toMap(new JSONObject(metadataJsonString));
             sdkInstance.setDeviceMetadata(metadata);
         } catch (Exception e) {
             handleException(e);
@@ -101,5 +107,182 @@ public class HyperTrackJsApiJava {
     static void handleException(Exception e) {
         e.printStackTrace();
         Log.e(TAG, e.toString());
+    }
+
+    /**
+     * Serialization
+     */
+
+    private static final String KEY_TYPE = "type";
+    private static final String KEY_VALUE = "value";
+
+    private static final String TYPE_SUCCESS = "success";
+    private static final String TYPE_FAILURE = "failure";
+
+    static Location deserializeLocation(Map<String, Object> map) {
+        try {
+            Location location = new Location("HyperTrack");
+            location.setLatitude((Double) map.get("latitude"));
+            location.setLongitude((Double) map.get("longitude"));
+            return location;
+        } catch (Exception e) {
+            HyperTrackJsApiJava.handleException(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    static Map<String, Object> serializeGeotagResult(GeotagResult result) {
+        if (result instanceof GeotagResult.SuccessWithDeviation) {
+            return serializeGeotagResult((GeotagResult.SuccessWithDeviation) result);
+        } else if (result instanceof GeotagResult.Success) {
+            return serializeGeotagResult((GeotagResult.Success) result);
+        } else if (result instanceof GeotagResult.Error) {
+            return serializeGeotagResult((GeotagResult.Error) result);
+        } else {
+            throw new RuntimeException("Unknown GeotagResult type");
+        }
+    }
+
+    private static Map<String, Object> serializeGeotagResult(GeotagResult.Success result) {
+        try {
+            Map<String, Object> map = new HashMap<>();
+            map.put(KEY_TYPE, TYPE_SUCCESS);
+            map.put(KEY_VALUE, serializeLocation(result.getDeviceLocation()));
+            return map;
+        } catch (Exception e) {
+            HyperTrackJsApiJava.handleException(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static Map<String, Object> serializeGeotagResult(GeotagResult.SuccessWithDeviation result) {
+        try {
+            Map<String, Object> map = new HashMap<>();
+            map.put(KEY_TYPE, TYPE_SUCCESS);
+            map.put(KEY_VALUE, serializeLocationWithDeviation(result.getDeviceLocation(), result.getDeviationDistance()));
+            return map;
+        } catch (Exception e) {
+            HyperTrackJsApiJava.handleException(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static Map<String, Object> serializeGeotagResult(GeotagResult.Error result) {
+        try {
+            Map<String, Object> map = new HashMap<>();
+            map.put(KEY_TYPE, TYPE_FAILURE);
+            map.put(KEY_VALUE, result.getReason().name());
+            return map;
+        } catch (Exception e) {
+            HyperTrackJsApiJava.handleException(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static Map<String, Object> serializeLocation(Location location) {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("latitude", location.getLatitude());
+        map.put("longitude", location.getLongitude());
+        return map;
+    }
+
+    private static Map<String, Object> serializeLocationWithDeviation(
+            Location location,
+            double deviation
+    ) {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("location", serializeLocation(location));
+        map.put("deviation", deviation);
+        return map;
+    }
+
+    /**
+     * WebViewSerialization
+     */
+
+    static String serializeGeotagResultForJs(GeotagResult result) {
+        try {
+            Map<String, Object> map = serializeGeotagResult(result);
+            return toJSONObject(map).toString();
+        } catch (Exception e) {
+            HyperTrackJsApiJava.handleException(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    static Map<String, Object> toMap(JSONObject jsonObject) throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        Iterator<String> keys = jsonObject.keys();
+
+        while (keys.hasNext()) {
+            String key = keys.next();
+            Object value = jsonObject.get(key);
+
+            if (value instanceof JSONArray) {
+                value = toList((JSONArray) value);
+            } else if (value instanceof JSONObject) {
+                value = toMap((JSONObject) value);
+            }
+
+            map.put(key, value);
+        }
+
+        return map;
+    }
+
+    private static List<Object> toList(JSONArray jsonArray) throws Exception {
+        List<Object> list = new ArrayList<>();
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            Object value = jsonArray.get(i);
+
+            if (value instanceof JSONArray) {
+                value = toList((JSONArray) value);
+            } else if (value instanceof JSONObject) {
+                value = toMap((JSONObject) value);
+            }
+
+            list.add(value);
+        }
+
+        return list;
+    }
+
+    private static JSONObject toJSONObject(Map<String, Object> map) {
+        try {
+            JSONObject jsonObject = new JSONObject();
+
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                Object value = entry.getValue();
+
+                if (value instanceof Map) {
+                    value = toJSONObject((Map) value);
+                } else if (value instanceof List) {
+                    value = toJSONArray((List) value);
+                }
+
+                jsonObject.put(entry.getKey(), value);
+            }
+
+            return jsonObject;
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static JSONArray toJSONArray(List<Object> list) {
+        JSONArray jsonArray = new JSONArray();
+
+        for (Object value : list) {
+            if (value instanceof Map) {
+                value = toJSONObject((Map) value);
+            } else if (value instanceof List) {
+                value = toJSONArray((List) value);
+            }
+
+            jsonArray.put(value);
+        }
+
+        return jsonArray;
     }
 }
