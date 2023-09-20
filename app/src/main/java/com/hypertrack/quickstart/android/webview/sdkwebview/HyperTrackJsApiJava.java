@@ -38,10 +38,10 @@ public class HyperTrackJsApiJava {
                         "addGeotag(): Unexpected GeotagResult type - GeotagResult.SuccessWithDeviation"
                 );
             }
-            return serializeGeotagResultForJs(result);
+            return serializeJsSuccess(serializeGeotagResult(result));
         } catch (Exception e) {
             handleException(e);
-            throw new RuntimeException(e);
+            return serializeJsFailure(e);
         }
     }
 
@@ -60,10 +60,10 @@ public class HyperTrackJsApiJava {
                         "addGeotagWithExpectedLocation(): Unexpected GeotagResult type - GeotagResult.Success"
                 );
             }
-            return serializeGeotagResultForJs(result);
+            return serializeJsSuccess(serializeGeotagResult(result));
         } catch (Exception e) {
             handleException(e);
-            throw new RuntimeException(e);
+            return serializeJsFailure(e);
         }
     }
 
@@ -115,6 +115,7 @@ public class HyperTrackJsApiJava {
 
     private static final String KEY_TYPE = "type";
     private static final String KEY_VALUE = "value";
+    private static final String KEY_ERROR = "error";
 
     private static final String TYPE_SUCCESS = "success";
     private static final String TYPE_FAILURE = "failure";
@@ -131,7 +132,7 @@ public class HyperTrackJsApiJava {
         }
     }
 
-    static Map<String, Object> serializeGeotagResult(GeotagResult result) {
+    static Map<String, Object> serializeGeotagResult(GeotagResult result) throws Exception {
         if (result instanceof GeotagResult.SuccessWithDeviation) {
             return serializeGeotagResult((GeotagResult.SuccessWithDeviation) result);
         } else if (result instanceof GeotagResult.Success) {
@@ -143,40 +144,25 @@ public class HyperTrackJsApiJava {
         }
     }
 
-    private static Map<String, Object> serializeGeotagResult(GeotagResult.Success result) {
-        try {
-            Map<String, Object> map = new HashMap<>();
-            map.put(KEY_TYPE, TYPE_SUCCESS);
-            map.put(KEY_VALUE, serializeLocation(result.getDeviceLocation()));
-            return map;
-        } catch (Exception e) {
-            HyperTrackJsApiJava.handleException(e);
-            throw new RuntimeException(e);
-        }
+    private static Map<String, Object> serializeGeotagResult(GeotagResult.Success result) throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        map.put(KEY_TYPE, TYPE_SUCCESS);
+        map.put(KEY_VALUE, serializeLocation(result.getDeviceLocation()));
+        return map;
     }
 
-    private static Map<String, Object> serializeGeotagResult(GeotagResult.SuccessWithDeviation result) {
-        try {
-            Map<String, Object> map = new HashMap<>();
-            map.put(KEY_TYPE, TYPE_SUCCESS);
-            map.put(KEY_VALUE, serializeLocationWithDeviation(result.getDeviceLocation(), result.getDeviationDistance()));
-            return map;
-        } catch (Exception e) {
-            HyperTrackJsApiJava.handleException(e);
-            throw new RuntimeException(e);
-        }
+    private static Map<String, Object> serializeGeotagResult(GeotagResult.SuccessWithDeviation result) throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        map.put(KEY_TYPE, TYPE_SUCCESS);
+        map.put(KEY_VALUE, serializeLocationWithDeviation(result.getDeviceLocation(), result.getDeviationDistance()));
+        return map;
     }
 
-    private static Map<String, Object> serializeGeotagResult(GeotagResult.Error result) {
-        try {
-            Map<String, Object> map = new HashMap<>();
-            map.put(KEY_TYPE, TYPE_FAILURE);
-            map.put(KEY_VALUE, result.getReason().name());
-            return map;
-        } catch (Exception e) {
-            HyperTrackJsApiJava.handleException(e);
-            throw new RuntimeException(e);
-        }
+    private static Map<String, Object> serializeGeotagResult(GeotagResult.Error result) throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        map.put(KEY_TYPE, TYPE_FAILURE);
+        map.put(KEY_VALUE, result.getReason().name());
+        return map;
     }
 
     private static Map<String, Object> serializeLocation(Location location) {
@@ -200,14 +186,16 @@ public class HyperTrackJsApiJava {
      * WebViewSerialization
      */
 
-    static String serializeGeotagResultForJs(GeotagResult result) {
-        try {
-            Map<String, Object> map = serializeGeotagResult(result);
-            return toJSONObject(map).toString();
-        } catch (Exception e) {
-            HyperTrackJsApiJava.handleException(e);
-            throw new RuntimeException(e);
-        }
+    static String serializeJsSuccess(Map<String, Object> data) throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        map.put(KEY_TYPE, TYPE_SUCCESS);
+        map.put(KEY_VALUE, data);
+        return toJSONObject(map).toString();
+    }
+
+    static String serializeJsFailure(Exception exception) {
+        String error = "{\"error\":\"" + exception.toString() + "\"}";
+        return "{\"type\":\"failure\", \"value\": " + error + "}";
     }
 
     static Map<String, Object> toMap(JSONObject jsonObject) throws Exception {
@@ -248,7 +236,7 @@ public class HyperTrackJsApiJava {
         return list;
     }
 
-    private static JSONObject toJSONObject(Map<String, Object> map) {
+    private static JSONObject toJSONObject(Map<String, Object> map) throws Exception {
         try {
             JSONObject jsonObject = new JSONObject();
 
@@ -270,7 +258,7 @@ public class HyperTrackJsApiJava {
         }
     }
 
-    private static JSONArray toJSONArray(List<Object> list) {
+    private static JSONArray toJSONArray(List<Object> list) throws Exception {
         JSONArray jsonArray = new JSONArray();
 
         for (Object value : list) {
@@ -284,5 +272,11 @@ public class HyperTrackJsApiJava {
         }
 
         return jsonArray;
+    }
+
+    private static Map<String, Object> serializeExceptionToJsError(Exception exception) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(KEY_ERROR, exception.toString());
+        return map;
     }
 }
