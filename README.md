@@ -1,5 +1,7 @@
 # Android Webview Quickstart for HyperTrack SDK
 
+[![GitHub](https://img.shields.io/github/license/hypertrack/quickstart-webview?color=orange)](./LICENSE)
+
 [HyperTrack](https://www.hypertrack.com/) lets you add live location tracking to your mobile app. Live location is made available along with ongoing activity, tracking controls and tracking outage with reasons.
 
 This repo contains an example Android app with a WebView that demonstrates you how to integrate your website with HyperTrack SDK.
