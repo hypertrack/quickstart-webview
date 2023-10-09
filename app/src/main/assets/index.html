@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <body>
-<h1>Quickstart Webview</h1>
+<h1>sdk-webview demo</h1>
 <h4>Device ID:</h4>
 <p id="device-id"></p>
 <script src="main.js"></script>
@@ -9,14 +9,27 @@
 <br/><br/>
 <button onclick="stopTracking()">Stop tracking</button>
 <br/><br/>
+
 <button onclick="addGeotag()">Add geotag</button>
 <br/><br/>
 <button onclick="addGeotagWithExpectedLocation()">Add geotag with expected location</button>
+<br/><br/>
+<button onclick="getErrors()">Get errors</button>
+<br/><br/>
+<button onclick="getLocation()">Get location</button>
 <br/><br/>
 <button onclick="setMetadata()">Set metadata</button>
 <br/><br/>
 <button onclick="setName()">Set name</button>
 <br/><br/>
-<button onclick="askForPermissions()">Ask for permissions</button>
+
+<button onclick="askForLocationPermission()">Ask for location permission</button>
+<br/><br/>
+<button onclick="askForBackgroundLocationPermission()">Ask for background location permission
+</button>
+<br/><br/>
+<button onclick="askForNotificationsPermission()">Ask for notifications permission</button>
+<br/><br/>
+<button onclick="openAppSettings()">Open app settings</button>
 </body>
 </html>

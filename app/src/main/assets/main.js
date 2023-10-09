@@ -62,15 +62,34 @@ function addGeotagWithExpectedLocation() {
     }
 }
 
+function getErrors() {
+    try {
+        let errors = HyperTrack.getErrors();
+        alert(JSON.stringify(JSON.parse(errors), null, 2));
+    } catch (e) {
+        alert(e);
+    }
+}
+
+function getLocation() {
+    try {
+        let location = HyperTrack.getLocation();
+        alert(JSON.stringify(JSON.parse(location), null, 2));
+    } catch (e) {
+        alert(e);
+    }
+}
+
 function setMetadata() {
     try {
-        HyperTrack.setMetadata(
+        let result = HyperTrack.setMetadata(
             JSON.stringify(
                 {
                     "metadata_field": "test_metadata_value"
                 }
             )
         );
+        alert(JSON.stringify(JSON.parse(result), null, 2));
     } catch (e) {
         alert(e);
     }
@@ -84,9 +103,33 @@ function setName() {
      }
 }
 
-function askForPermissions() {
+function askForLocationPermission() {
     try {
-        HyperTrack.requestPermissionsIfNecessary();
+        HyperTrack.askForLocationPermission();
+    } catch (e) {
+        alert(e);
+    }
+}
+
+function askForBackgroundLocationPermission() {
+    try {
+        HyperTrack.askForBackgroundLocationPermission();
+    } catch (e) {
+        alert(e);
+    }
+}
+
+function askForNotificationsPermission() {
+    try {
+        HyperTrack.askForNotificationsPermission();
+    } catch (e) {
+        alert(e);
+    }
+}
+
+function openAppSettings() {
+    try {
+        HyperTrack.openAppSettings();
     } catch (e) {
         alert(e);
     }
