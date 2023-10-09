@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 
+import androidx.annotation.NonNull;
+
 import com.hypertrack.sdk.webview.android.HyperTrackWebViewJsApi;
 
 public class MainActivity extends Activity {
@@ -34,24 +36,14 @@ public class MainActivity extends Activity {
         }
     }
 
-//    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
-//        super.onSaveInstanceState(outState, outPersistentState)
-//        webView?.saveState(outState)
-//    }
-//
-//    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-//        super.onRestoreInstanceState(savedInstanceState)
-//        webView?.restoreState(savedInstanceState)
-//    }
-
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         webView.saveState(outState);
     }
 
     @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState) {
+    public void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         webView.restoreState(savedInstanceState);
     }
