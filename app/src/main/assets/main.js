@@ -103,33 +103,33 @@ function setName() {
      }
 }
 
-function askForLocationPermission() {
-    try {
-        HyperTrack.askForLocationPermission();
-    } catch (e) {
-        alert(e);
-    }
-}
-
-function askForBackgroundLocationPermission() {
-    try {
-        HyperTrack.askForBackgroundLocationPermission();
-    } catch (e) {
-        alert(e);
-    }
-}
-
-function askForNotificationsPermission() {
-    try {
-        HyperTrack.askForNotificationsPermission();
-    } catch (e) {
-        alert(e);
-    }
-}
-
 function openAppSettings() {
     try {
         HyperTrack.openAppSettings();
+    } catch (e) {
+        alert(e);
+    }
+}
+
+function requestLocationPermission() {
+    try {
+        HyperTrack.requestLocationPermission();
+    } catch (e) {
+        alert(e);
+    }
+}
+
+function requestBackgroundLocationPermission() {
+    try {
+        HyperTrack.requestBackgroundLocationPermission();
+    } catch (e) {
+        alert(e);
+    }
+}
+
+function requestNotificationsPermission() {
+    try {
+        HyperTrack.requestNotificationsPermission();
     } catch (e) {
         alert(e);
     }
